@@ -1,4 +1,4 @@
-i am an error
+
 def binary_search(arr, target):
     \"\"\"
     A flawed binary search implementation for testing.
