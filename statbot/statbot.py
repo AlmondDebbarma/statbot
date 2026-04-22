@@ -45,8 +45,13 @@ MAX_CONTEXT_CHARS = 200_000   # ~50K tokens
 MAX_FILE_CHARS = 30_000       # Skip individual files larger than ~7.5K tokens
 MAX_HISTORY_MESSAGES = 10     # Keep chat history trimmed
 
-# Gemini model — free tier, fast, 1M context window
-GEMINI_MODEL = "gemini-2.5-flash"
+# Gemini models — we use a fallback list to bypass free-tier 503 capacity issues
+GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro-latest"
+]
 
 
 # ── Gemini API ─────────────────────────────────────────────────────────
@@ -67,11 +72,11 @@ def _get_api_key() -> str:
     return key
 
 
-def call_gemini(messages: list, system_instruction: str, api_key: str) -> str:
+def call_gemini(messages: list, system_instruction: str, api_key: str, model_name: str) -> str:
     """Call the Gemini REST API and return the text response."""
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{GEMINI_MODEL}:generateContent?key={api_key}"
+        f"{model_name}:generateContent?key={api_key}"
     )
 
     payload = {
@@ -359,17 +364,21 @@ def main():
                 {"role": "user", "parts": [{"text": query}]}
             ]
 
-            # Retry loop with exponential backoff for rate limits
+            # Retry loop with exponential backoff and model fallbacks
             response_text = None
-            for attempt in range(5):
+            max_attempts = len(GEMINI_MODELS) * 2  # Try each model twice
+            for attempt in range(max_attempts):
+                current_model = GEMINI_MODELS[attempt % len(GEMINI_MODELS)]
                 try:
-                    with console.status("[bold blue]Statbot is thinking...", spinner="dots"):
-                        response_text = call_gemini(gemini_messages, active_system, api_key)
+                    with console.status(f"[bold blue]Statbot thinking ({current_model})...", spinner="dots"):
+                        response_text = call_gemini(gemini_messages, active_system, api_key, current_model)
                     break
                 except RetryableAPIError as e:
-                    wait = (2 ** attempt) + 1
+                    wait = (2 ** (attempt // len(GEMINI_MODELS))) + 1
                     err_msg = str(e).split(':', 1)[0]
-                    console.print(f"[bold yellow]{err_msg}. Retrying in {wait}s... (attempt {attempt + 1}/5)[/bold yellow]")
+                    
+                    next_model = GEMINI_MODELS[(attempt + 1) % len(GEMINI_MODELS)]
+                    console.print(f"[bold yellow]{err_msg} on {current_model}. Trying {next_model} in {wait}s...[/bold yellow]")
                     time.sleep(wait)
 
             if response_text is None:
