@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "statbot"
+version = "1.0.0"
+description = "AI Codebase Assistant - analyze any project from your terminal"
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv",
+    "rich",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+# This is the magic — maps the command "statbot" to the main() function
+[project.scripts]
+statbot = "statbot.statbot:main"
+
+[tool.setuptools.packages.find]
+include = ["statbot*"]
