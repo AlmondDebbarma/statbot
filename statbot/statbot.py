@@ -380,12 +380,31 @@ def main():
     if target_dir:
         os.chdir(target_dir)
 
-    console.print(Panel.fit(
-        "[bold green]Welcome to Statbot![/bold green]\n"
-        "Your AI Codebase Assistant powered by Gemini.",
-        border_style="green"
+    console.print(Panel(
+        "[bold green]Statbot[/bold green] — AI Codebase Assistant\n"
+        "[dim]Powered by Google Gemini · Free tier[/dim]\n\n"
+        "I read your code and answer questions about it — bugs, logic, structure, anything.\n"
+        "I only look at files relevant to what you ask, so I stay fast and focused.\n\n"
+        "[bold cyan]Commands[/bold cyan]\n"
+        "  [green]Just type[/green]                Ask anything about your code\n"
+        "                          [dim]e.g. 'why does login fail?' or 'explain the payment flow'[/dim]\n\n"
+        "  [green]analyze <file>[/green]           Deep bug report — every issue, exact line numbers,\n"
+        "                          fixed code, and a final verdict\n"
+        "                          [dim]e.g. 'analyze app.py' or 'analyze main.js why does it crash?'[/dim]\n\n"
+        "  [green]iterate <file>[/green]           Coaching mode — I find the biggest bug and give\n"
+        "                          you a hint. You fix it, then type [bold]reiterate[/bold] to check\n"
+        "                          your work and get a score. Add [bold]--advanced[/bold] for harder feedback\n"
+        "                          [dim]e.g. 'iterate homework.py' then fix it, then 'reiterate'[/dim]\n\n"
+        "  [green]exit[/green]  [dim]or[/dim]  [green]quit[/green]           Close Statbot\n\n"
+        "[bold cyan]Tips[/bold cyan]\n"
+        "  • Run [bold]statbot /path/to/project[/bold] to analyse a different folder\n"
+        "  • Create [bold].statbotignore[/bold] to hide files (like .gitignore) — e.g. exclude demo files\n"
+        "  • Free tier: ~9 questions/min, ~50/day before hitting Google's limit",
+        title="[bold green]Welcome![/bold green]",
+        border_style="green",
+        padding=(1, 2),
     ))
-    console.print(f"[dim]Working directory: {Path.cwd()}[/dim]\n")
+    console.print(f"[dim]  Working in: {Path.cwd()}[/dim]\n")
 
     api_key = _get_api_key()
 
@@ -422,10 +441,7 @@ def main():
     iterate_state = {"file": None, "prev_content": None, "round": 0, "advanced": False}
     last_context_files: set = set()  # Track previous query's file set for history trimming
 
-    console.print(f"[cyan]Multi-language support: {get_supported_languages()}[/cyan]")
-    console.print("[cyan]Tip: Type 'analyze <filename>' for deep bug analysis on a specific file.[/cyan]")
-    console.print("[cyan]Tip: Create .statbotignore to exclude folders/files from context.[/cyan]")
-    console.print("[cyan]Type 'exit' or 'quit' to exit.[/cyan]\n")
+    console.print(f"[dim]  Languages: {get_supported_languages()}[/dim]\n")
 
     while True:
         try:
