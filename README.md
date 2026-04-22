@@ -1,97 +1,163 @@
-# Statbot 🤖
+# Statbot
 
-**Statbot** is an AI-powered codebase assistant and Socratic coding coach that runs directly in your terminal. 
+**Statbot** is an AI-powered codebase assistant and Socratic coding coach that runs in your terminal.
 
-Instead of copying and pasting your code into ChatGPT, you can run Statbot directly in your project folder. It will read your entire project instantly and help you hunt down bugs, understand your code, and even coach you through fixing issues yourself without just giving you the answers!
+Instead of copying and pasting code into ChatGPT, run Statbot inside your project folder. It reads your code, answers questions about it, hunts down bugs with exact line numbers, and can coach you through fixing issues yourself — without just giving you the answers.
 
-Powered by **Google Gemini 2.5 Flash**, it is lightning-fast and capable of reading massive codebases (up to 200,000 characters of context at once).
-
----
-
-## 🌟 Features
-
-- **Global CLI:** Run `statbot` from anywhere in your terminal. No need to move files around!
-- **Auto-Context:** Automatically reads all the code in your current folder and provides it to the AI.
-- **Deep Bug Analysis (`analyze`):** Ask Statbot to do a deep, rigorous bug hunt on a specific file and get precise line numbers and fixed code.
-- **Socratic Coach (`iterate`):** Stuck on a problem but want to learn? Statbot will point out the single most important bug, give you a conceptual hint, and refuse to write the code for you. Fix it, type `reiterate`, and it will score your progress!
-- **Multi-Language Support:** Understands Python, JavaScript, TypeScript, C++, Java, Rust, HTML, CSS, and more.
+Powered by **Google Gemini 2.5 Flash** (free tier).
 
 ---
 
-## 💻 Installation (Beginner Friendly!)
+## Features
 
-Follow these exact steps to install Statbot on your machine.
+- **Smart Context Loading** — Instead of blindly dumping every file at the AI, Statbot scores each file by how relevant it is to your question and only sends the top matches. Saves your daily token quota and keeps answers focused.
+- **General Chat** — Ask anything about your codebase. Statbot cites exact file names and line numbers in every answer.
+- **Deep Bug Analysis (`analyze`)** — Rigorous bug hunt on a specific file. Get a severity-ranked report with exact line numbers and corrected code.
+- **Socratic Coach (`iterate` / `reiterate`)** — Statbot finds the single most important bug, gives you a conceptual hint, and refuses to write the fix for you. Fix it yourself, type `reiterate`, and get an Iteration Score showing your progress.
+- **Multi-Language** — Python, JavaScript, TypeScript, C, C++, Java, HTML, CSS, Rust, Go, and more.
+- **`.statbotignore`** — Exclude folders and files from context, just like `.gitignore`. Useful for keeping demo files, build artifacts, or the tool's own source out of the AI's view.
+- **Model Fallback** — If the primary model hits a rate limit, Statbot silently falls back to `gemini-2.5-flash-lite` without interrupting your session.
 
-### Step 1: Clone or Download this Project
-First, download this folder to your computer. Open your terminal (Command Prompt, PowerShell, or Mac Terminal) and navigate inside the folder where you downloaded it.
+---
+
+## Installation
+
+### 1. Clone the project
 
 ```bash
-cd path/to/statbot
+git clone https://github.com/AlmondDebbarma/statbot.git
+cd statbot
 ```
 
-### Step 2: Install the Package
-Run the following command. This will install Statbot globally on your machine so you can use it anywhere.
+### 2. Install globally
 
 ```bash
 pip install -e .
 ```
-*(The `-e .` means it installs the code from the current folder in "editable" mode).*
 
-### Step 3: Get a Free Gemini API Key
-Statbot uses Google's AI, which requires a free API key.
-1. Go to [Google AI Studio](https://aistudio.google.com/apikey).
-2. Sign in with your Google account.
-3. Click **"Create API key"** and copy the long string of letters and numbers it gives you.
+The `-e .` installs from the current folder in editable mode. After this, the `statbot` command is available anywhere on your machine.
 
-### Step 4: Save Your API Key
-We need to save this key so Statbot can use it automatically without you having to paste it every time.
+### 3. Get a free Gemini API key
 
-**If you are on Windows (PowerShell):**
-Run this command, replacing `your_api_key_here` with your actual key:
+1. Go to [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+2. Sign in with your Google account
+3. Click **Create API key** and copy it
+
+### 4. Save the key (one-time setup)
+
+**Windows (PowerShell):**
 ```powershell
-python -c "import os; open(r'C:\Users\' + os.getlogin() + '\.statbot\.env', 'w', encoding='utf-8').write('GEMINI_API_KEY=your_api_key_here\n')"
+python -c "import os; p=os.path.expanduser('~/.statbot'); os.makedirs(p, exist_ok=True); open(p+'/.env','w').write('GEMINI_API_KEY=your_key_here\n')"
 ```
 
-**If you are on Mac/Linux:**
+**Mac / Linux:**
 ```bash
 mkdir -p ~/.statbot
-echo "GEMINI_API_KEY=your_api_key_here" > ~/.statbot/.env
+echo "GEMINI_API_KEY=your_key_here" > ~/.statbot/.env
+```
+
+Replace `your_key_here` with the key you copied. This file is read automatically every time you run Statbot from any directory.
+
+---
+
+## Usage
+
+Open a terminal, `cd` into any project folder, and run:
+
+```bash
+statbot
+```
+
+Or point it at a specific directory:
+
+```bash
+statbot /path/to/your/project
+```
+
+Statbot scans the folder, indexes your files, and gives you a prompt.
+
+### Commands
+
+#### General chat
+Just type your question:
+```
+You: Where is the user authentication logic?
+You: Why might this crash on startup?
+You: Explain how the database connection pool works.
+```
+Statbot selects the most relevant files for each question automatically and cites exact file names and line numbers in every answer.
+
+#### Deep bug analysis
+```
+You: analyze app.py
+You: analyze main.js why does the login fail?
+```
+Performs a full severity-ranked bug report: dry-runs the logic, flags every issue with line numbers, provides the corrected code, and gives a final verdict (CLEAN / MINOR ISSUES / NEEDS FIXES / CRITICAL BUGS).
+
+#### Socratic coaching
+```
+You: iterate homework.py
+```
+Statbot finds the biggest bug and gives you a hint — no answer, no line numbers. Fix it in your editor, save, then:
+```
+You: reiterate
+```
+Statbot checks what you changed, acknowledges the fix (or gives you a trace exercise if you missed it), and points to the next issue. Includes an Iteration Score each round.
+
+For advanced mode (structural and performance issues, not just correctness):
+```
+You: iterate homework.py --advanced
+```
+
+#### Exit
+```
+You: exit
 ```
 
 ---
 
-## 🚀 How to Use Statbot
+## Excluding files with `.statbotignore`
 
-Now that it's installed, you never have to come back to this folder. You can use it on **any** project!
+Create a `.statbotignore` file in the directory you run Statbot from. Syntax is identical to `.gitignore`.
 
-1. Open your terminal.
-2. `cd` into the folder of the project you are working on.
-3. Type:
-   ```bash
-   statbot
-   ```
+```
+# Exclude the statbot source package when running from this repo
+statbot/
 
-Statbot will boot up, scan your project, and give you a `You:` prompt.
+# Exclude demo files
+demo_code.*
+demo.py
 
-### Inside Statbot, you can use these commands:
+# Exclude build artifacts
+*.egg-info
+dist/
+build/
+```
 
-#### 1. General Chat
-Just ask questions! 
-- *"Where is the user login logic?"*
-- *"Explain how the database connection works."*
+Lines starting with `#` are comments. Directory patterns end with `/`. File patterns support `*` wildcards.
 
-#### 2. Deep Analysis
-Type `analyze <filename>` to get a rigorous bug report for a specific file.
-- `You: analyze app.js`
-- `You: analyze main.py why is it crashing on startup?`
+---
 
-#### 3. Socratic Coaching (The best way to learn)
-Type `iterate <filename>`. Statbot will look at your file, find the biggest bug, and give you a hint without showing you the answer.
-- `You: iterate index.html`
+## Free tier limits (at a glance)
 
-Go to your code editor, try to fix the bug based on the hint, save the file, and then type:
-- `You: reiterate`
+| What | Limit |
+|---|---|
+| Questions per minute | ~9 (enforced by Statbot) |
+| Questions per day | ~50 on Flash, ~75 on Flash-Lite |
+| Lines of code per query | ~2,000–3,000 (smart-selected) |
+| Max single file size | ~400–500 lines |
+| Conversation memory | Last 5 exchanges |
 
-Statbot will look at what you changed, tell you if you fixed it, give you an Iteration Score, and point out the next issue!
+All free. No credit card required.
 
-Type `exit` or `quit` to close Statbot when you're done.
+---
+
+## How context selection works
+
+When you ask a question, Statbot scores every indexed file:
+- **+10** if the filename contains a keyword from your query
+- **+1 per occurrence** (capped at 5) if the content contains a keyword
+
+The top-scoring files are loaded up to the token budget. If your question mentions `auth`, files named `auth.py` or `middleware.js` containing `authenticate` will rank above unrelated files.
+
+When the loaded file set changes between questions (i.e. a different topic), Statbot automatically trims conversation history to the last exchange. This prevents the AI from referencing files it can no longer see.

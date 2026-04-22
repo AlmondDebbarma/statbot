@@ -1,0 +1,16 @@
+# .statbotignore — exclude files and folders from Statbot's context
+# Syntax is like .gitignore: one pattern per line, # = comment
+#
+# Examples:
+#   demo_code.*        ignore all demo_code files
+#   statbot/           ignore the statbot source package folder
+#   tests/             ignore the tests directory
+#   *.egg-info         ignore build artifacts
+#   node_modules/      ignore node_modules
+
+# Uncomment the lines you want to activate:
+
+# statbot/
+# demo_code.*
+# demo.py
+# tests/
